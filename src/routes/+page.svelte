@@ -27,9 +27,9 @@
   </script>
   
   <h1>Finance Dashboard</h1>
-  <p><strong>Revenue:</strong> {formatCurrency(data.revenue)}</p>
-  <p><strong>Expenses:</strong> {formatCurrency(data.expenses)}</p>
-  <p><strong>Profit:</strong> {formatCurrency(data.profit)}</p>
+  <p><strong>Revenue:</strong> {formatCurrency(120000)}</p>
+  <p><strong>Expenses:</strong> {formatCurrency(300000)}</p>
+  <p><strong>Profit:</strong> {formatCurrency(20000)}</p>
   
   <button on:click={addIncome}>+ Add Income</button>
   <button on:click={addExpense}>- Add Expense</button>
@@ -39,7 +39,5 @@
   <input type="date" bind:value={goalDeadline} />
   <button on:click={setGoal}>Set Goal</button>
   
-  {#if data.financialGoal.target}
-    <p><strong>Goal:</strong> {formatCurrency(data.financialGoal.target)} by {data.financialGoal.deadline}</p>
-  {/if}
+ 
   
