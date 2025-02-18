@@ -240,3 +240,94 @@
     border-radius: 4px;
   }
 </style>
+<script>
+  import { goto } from '$app/navigation';
+</script>
+
+<main class="landing-container">
+  <h1>ERP System</h1>
+  
+  <div class="module-cards">
+    <div class="module-card finance" on:click={() => goto('/finance')}>
+      <h2>Finance Module</h2>
+      <p>Financial Management & Analysis</p>
+      <ul>
+        <li>Automated Ledger System</li>
+        <li>Multi-Currency Support</li>
+        <li>Tax Management</li>
+        <li>Financial Forecasting</li>
+      </ul>
+    </div>
+    
+    <div class="module-card analytics" on:click={() => goto('/analytics')}>
+      <h2>Business Analytics</h2>
+      <p>Data-Driven Insights</p>
+      <ul>
+        <li>AI-Powered Analytics</li>
+        <li>Real-time Reporting</li>
+        <li>Predictive Analysis</li>
+        <li>Performance Metrics</li>
+      </ul>
+    </div>
+  </div>
+</main>
+
+<style>
+  .landing-container {
+    min-height: 100vh;
+    padding: 2rem;
+    background-color: #EAEBED;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    color: #232B28;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .module-cards {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .module-card {
+    width: 300px;
+    padding: 2rem;
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .module-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .finance {
+    background-color: #1098F7;
+  }
+
+  .analytics {
+    background-color: #3B28CC;
+  }
+
+  h2 {
+    margin: 0 0 1rem 0;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0 0;
+  }
+
+  li {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+  }
+</style>
