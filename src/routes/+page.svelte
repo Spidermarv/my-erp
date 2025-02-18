@@ -1,43 +1,242 @@
+
 <script>
-    import { onMount } from "svelte";
-    import { financialData, addTransaction, setFinancialGoal } from "$lib/stores/financialData";
-    import { formatCurrency } from "$lib/utils"; 
-  
-    let data = {};
-    let goalTarget = 100000;
-    let goalDeadline = "2025-12-31";
-  
-    onMount(() => {
-      financialData.subscribe((value) => {
-        data = value;
-      });
+  import { onMount } from "svelte";
+  import { financialData, addTransaction, setFinancialGoal, addDocument } from "$lib/stores/financialData";
+  import { formatCurrency } from "$lib/utils";
+
+  let data = {};
+  let newTransaction = {
+    type: "income",
+    amount: 0,
+    category: "",
+    currency: "MWK"
+  };
+  let goalTarget = 100000;
+  let goalDeadline = "2025-12-31";
+  let goalStrategies = "";
+
+  onMount(() => {
+    financialData.subscribe((value) => {
+      data = value;
     });
-  
-    function addIncome() {
-      addTransaction("income", 5000, "Product Sales", new Date().toISOString());
+  });
+
+  function handleTransactionSubmit() {
+    addTransaction(
+      newTransaction.type,
+      newTransaction.amount,
+      newTransaction.category,
+      new Date().toISOString(),
+      newTransaction.currency
+    );
+    newTransaction.amount = 0;
+    newTransaction.category = "";
+  }
+
+  function handleGoalSubmit() {
+    setFinancialGoal(
+      goalTarget,
+      goalDeadline,
+      goalStrategies.split('\n').filter(s => s.trim())
+    );
+  }
+
+  function uploadDocument(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        addDocument(
+          file.name,
+          file.type,
+          e.target.result,
+          new Date().toISOString()
+        );
+      };
+      reader.readAsDataURL(file);
     }
+  }
+</script>
+
+<main class="container">
+  <h1>Financial Dashboard</h1>
   
-    function addExpense() {
-      addTransaction("expense", 2000, "Marketing", new Date().toISOString());
-    }
-  
-    function setGoal() {
-      setFinancialGoal(goalTarget, goalDeadline);
-    }
-  </script>
-  
-  <h1>Finance Dashboard</h1>
-  <p><strong>Revenue:</strong> {formatCurrency(120000)}</p>
-  <p><strong>Expenses:</strong> {formatCurrency(300000)}</p>
-  <p><strong>Profit:</strong> {formatCurrency(20000)}</p>
-  
-  <button on:click={addIncome}>+ Add Income</button>
-  <button on:click={addExpense}>- Add Expense</button>
-  
-  <h2>Financial Goal</h2>
-  <input type="number" bind:value={goalTarget} placeholder="Target Amount" />
-  <input type="date" bind:value={goalDeadline} />
-  <button on:click={setGoal}>Set Goal</button>
-  
- 
-  
+  <section class="metrics">
+    <div class="metric">
+      <h3>Revenue</h3>
+      <p>{formatCurrency(data.revenue)}</p>
+    </div>
+    <div class="metric">
+      <h3>Expenses</h3>
+      <p>{formatCurrency(data.expenses)}</p>
+    </div>
+    <div class="metric">
+      <h3>Profit</h3>
+      <p>{formatCurrency(data.profit)}</p>
+    </div>
+    <div class="metric">
+      <h3>Cash Flow</h3>
+      <p>{formatCurrency(data.cashFlow)}</p>
+    </div>
+  </section>
+
+  <section class="financial-health">
+    <h2>Financial Health</h2>
+    <div class="health-score">
+      Score: {data.financialHealth?.score.toFixed(2)}
+    </div>
+    <div class="health-metrics">
+      {#each Object.entries(data.financialHealth?.metrics || {}) as [key, value]}
+        <div class="metric">
+          <span>{key}:</span>
+          <span>{value.toFixed(2)}%</span>
+        </div>
+      {/each}
+    </div>
+  </section>
+
+  <section class="transactions">
+    <h2>Add Transaction</h2>
+    <div class="form">
+      <select bind:value={newTransaction.type}>
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+      <input
+        type="number"
+        bind:value={newTransaction.amount}
+        placeholder="Amount"
+      />
+      <input
+        type="text"
+        bind:value={newTransaction.category}
+        placeholder="Category"
+      />
+      <select bind:value={newTransaction.currency}>
+        <option value="MWK">MWK</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+      </select>
+      <button on:click={handleTransactionSubmit}>Add Transaction</button>
+    </div>
+  </section>
+
+  <section class="financial-goal">
+    <h2>Financial Goal</h2>
+    <div class="form">
+      <input
+        type="number"
+        bind:value={goalTarget}
+        placeholder="Target Amount"
+      />
+      <input
+        type="date"
+        bind:value={goalDeadline}
+      />
+      <textarea
+        bind:value={goalStrategies}
+        placeholder="Enter strategies (one per line)"
+      ></textarea>
+      <button on:click={handleGoalSubmit}>Set Goal</button>
+    </div>
+    {#if data.financialGoal?.target}
+      <div class="goal-progress">
+        <h3>Goal Progress: {data.financialGoal.progress.toFixed(2)}%</h3>
+        <progress value={data.financialGoal.progress} max="100"></progress>
+      </div>
+    {/if}
+  </section>
+
+  <section class="documents">
+    <h2>Documents</h2>
+    <input
+      type="file"
+      on:change={uploadDocument}
+      accept=".pdf,.doc,.docx,.xls,.xlsx"
+    />
+    <div class="document-list">
+      {#each data.documents || [] as doc}
+        <div class="document">
+          <span>{doc.title}</span>
+          <span>{new Date(doc.date).toLocaleDateString()}</span>
+        </div>
+      {/each}
+    </div>
+  </section>
+</main>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .metric {
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+  }
+
+  .form {
+    display: grid;
+    gap: 10px;
+    max-width: 500px;
+    margin-bottom: 20px;
+  }
+
+  .health-score {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 10px 0;
+  }
+
+  .health-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .goal-progress {
+    margin-top: 20px;
+  }
+
+  progress {
+    width: 100%;
+    height: 20px;
+  }
+
+  section {
+    margin-bottom: 30px;
+  }
+
+  h1, h2, h3 {
+    margin-bottom: 15px;
+  }
+
+  button {
+    padding: 10px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #45a049;
+  }
+
+  input, select, textarea {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+</style>
