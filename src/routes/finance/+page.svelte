@@ -122,9 +122,44 @@
 
 <style>
   .finance-dashboard {
-    background-color: #f5f7fa;
+    background: linear-gradient(to bottom, #f8f9fc, #eef1f9);
     min-height: 100vh;
-    padding: 1rem;
+    padding: 2rem;
+  }
+
+  .card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1), 0 1px 2px rgba(16, 24, 40, 0.06);
+    transition: all 0.2s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 8px -2px rgba(16, 24, 40, 0.1), 0 2px 4px -1px rgba(16, 24, 40, 0.06);
+  }
+
+  .amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1098F7;
+    letter-spacing: -1px;
+  }
+
+  button {
+    background: linear-gradient(to right, #1098F7, #0d7ac4);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 152, 247, 0.15);
   }
 
   header {

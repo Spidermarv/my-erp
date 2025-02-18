@@ -245,6 +245,7 @@
 </script>
 
 <main class="landing-container">
+  <img src="/logo.svg" alt="Logo" class="logo" />
   <h1>ERP System</h1>
   
   <div class="module-cards">
@@ -273,14 +274,100 @@
 </main>
 
 <style>
+  :global(body) {
+    background: #f8f9fc;
+    color: #1a1f36;
+  }
+
   .landing-container {
     min-height: 100vh;
     padding: 2rem;
-    background-color: #EAEBED;
+    background: linear-gradient(to bottom, #f8f9fc, #eef1f9);
     display: flex;
     flex-direction: column;
     align-items: center;
   }
+
+  .logo {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a1f36;
+    margin-bottom: 3rem;
+    letter-spacing: -0.5px;
+  }
+
+  .module-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 1rem;
+  }
+
+  .module-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    color: #1a1f36;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1), 0 1px 2px rgba(16, 24, 40, 0.06);
+  }
+
+  .module-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -4px rgba(16, 24, 40, 0.08), 0 4px 8px -2px rgba(16, 24, 40, 0.04);
+  }
+
+  .finance {
+    border-left: 4px solid #1098F7;
+  }
+
+  .analytics {
+    border-left: 4px solid #3B28CC;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: #1a1f36;
+  }
+
+  p {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+    font-size: 0.9375rem;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0 0;
+  }
+
+  li {
+    margin: 0.75rem 0;
+    color: #64748b;
+    font-size: 0.9375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  li::before {
+    content: "•";
+    color: #3B28CC;
+    font-weight: bold;
+  }
+</style>
 
   h1 {
     color: #232B28;
