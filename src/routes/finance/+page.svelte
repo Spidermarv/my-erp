@@ -1,4 +1,3 @@
-
 <script>
   import { onMount } from 'svelte';
   import { financialData } from '$lib/stores/financialData';
@@ -132,7 +131,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="card risk-assessment">
       <h3>Risk Assessment</h3>
       <div class="risk-grid">

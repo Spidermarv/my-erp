@@ -1,12 +1,6 @@
-export function formatCurrency(amount, currency = "MWK") {
-    return new Intl.NumberFormat("en-MW", {
-      style: "currency",
-      currency: currency,
-    }).format(amount);
-  }
-  
-export function formatCurrency(amount, currency = 'USD') {
-  return new Intl.NumberFormat('en-US', {
+
+export function formatCurrency(amount, currency = 'MWK') {
+  return new Intl.NumberFormat('en-MW', {
     style: 'currency',
     currency: currency
   }).format(amount);
