@@ -1,420 +1,162 @@
-
-<script>
-  import { onMount } from "svelte";
-  import { financialData, addTransaction, setFinancialGoal, addDocument } from "$lib/stores/financialData";
-  import { formatCurrency } from "$lib/utils";
-
-  let data = {};
-  let newTransaction = {
-    type: "income",
-    amount: 0,
-    category: "",
-    currency: "MWK"
-  };
-  let goalTarget = 100000;
-  let goalDeadline = "2025-12-31";
-  let goalStrategies = "";
-
-  onMount(() => {
-    financialData.subscribe((value) => {
-      data = value;
-    });
-  });
-
-  function handleTransactionSubmit() {
-    addTransaction(
-      newTransaction.type,
-      newTransaction.amount,
-      newTransaction.category,
-      new Date().toISOString(),
-      newTransaction.currency
-    );
-    newTransaction.amount = 0;
-    newTransaction.category = "";
-  }
-
-  function handleGoalSubmit() {
-    setFinancialGoal(
-      goalTarget,
-      goalDeadline,
-      goalStrategies.split('\n').filter(s => s.trim())
-    );
-  }
-
-  function uploadDocument(event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        addDocument(
-          file.name,
-          file.type,
-          e.target.result,
-          new Date().toISOString()
-        );
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-</script>
-
-<main class="container">
-  <h1>Financial Dashboard</h1>
-  
-  <section class="metrics">
-    <div class="metric">
-      <h3>Revenue</h3>
-      <p>{formatCurrency(data.revenue)}</p>
-    </div>
-    <div class="metric">
-      <h3>Expenses</h3>
-      <p>{formatCurrency(data.expenses)}</p>
-    </div>
-    <div class="metric">
-      <h3>Profit</h3>
-      <p>{formatCurrency(data.profit)}</p>
-    </div>
-    <div class="metric">
-      <h3>Cash Flow</h3>
-      <p>{formatCurrency(data.cashFlow)}</p>
-    </div>
-  </section>
-
-  <section class="financial-health">
-    <h2>Financial Health</h2>
-    <div class="health-score">
-      Score: {data.financialHealth?.score.toFixed(2)}
-    </div>
-    <div class="health-metrics">
-      {#each Object.entries(data.financialHealth?.metrics || {}) as [key, value]}
-        <div class="metric">
-          <span>{key}:</span>
-          <span>{value.toFixed(2)}%</span>
-        </div>
-      {/each}
-    </div>
-  </section>
-
-  <section class="transactions">
-    <h2>Add Transaction</h2>
-    <div class="form">
-      <select bind:value={newTransaction.type}>
-        <option value="income">Income</option>
-        <option value="expense">Expense</option>
-      </select>
-      <input
-        type="number"
-        bind:value={newTransaction.amount}
-        placeholder="Amount"
-      />
-      <input
-        type="text"
-        bind:value={newTransaction.category}
-        placeholder="Category"
-      />
-      <select bind:value={newTransaction.currency}>
-        <option value="MWK">MWK</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-      </select>
-      <button on:click={handleTransactionSubmit}>Add Transaction</button>
-    </div>
-  </section>
-
-  <section class="financial-goal">
-    <h2>Financial Goal</h2>
-    <div class="form">
-      <input
-        type="number"
-        bind:value={goalTarget}
-        placeholder="Target Amount"
-      />
-      <input
-        type="date"
-        bind:value={goalDeadline}
-      />
-      <textarea
-        bind:value={goalStrategies}
-        placeholder="Enter strategies (one per line)"
-      ></textarea>
-      <button on:click={handleGoalSubmit}>Set Goal</button>
-    </div>
-    {#if data.financialGoal?.target}
-      <div class="goal-progress">
-        <h3>Goal Progress: {data.financialGoal.progress.toFixed(2)}%</h3>
-        <progress value={data.financialGoal.progress} max="100"></progress>
-      </div>
-    {/if}
-  </section>
-
-  <section class="documents">
-    <h2>Documents</h2>
-    <input
-      type="file"
-      on:change={uploadDocument}
-      accept=".pdf,.doc,.docx,.xls,.xlsx"
-    />
-    <div class="document-list">
-      {#each data.documents || [] as doc}
-        <div class="document">
-          <span>{doc.title}</span>
-          <span>{new Date(doc.date).toLocaleDateString()}</span>
-        </div>
-      {/each}
-    </div>
-  </section>
-</main>
-
-<style>
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-
-  .metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-  }
-
-  .metric {
-    padding: 15px;
-    background: #f5f5f5;
-    border-radius: 8px;
-  }
-
-  .form {
-    display: grid;
-    gap: 10px;
-    max-width: 500px;
-    margin-bottom: 20px;
-  }
-
-  .health-score {
-    font-size: 24px;
-    font-weight: bold;
-    margin: 10px 0;
-  }
-
-  .health-metrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px;
-  }
-
-  .goal-progress {
-    margin-top: 20px;
-  }
-
-  progress {
-    width: 100%;
-    height: 20px;
-  }
-
-  section {
-    margin-bottom: 30px;
-  }
-
-  h1, h2, h3 {
-    margin-bottom: 15px;
-  }
-
-  button {
-    padding: 10px;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  button:hover {
-    background: #45a049;
-  }
-
-  input, select, textarea {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-</style>
-<script>
+<script lang="ts">
   import { goto } from '$app/navigation';
+  
+  function navigateTo(path: string) {
+    goto(path);
+  }
 </script>
 
-<main class="landing-container">
-  <img src="/logo.svg" alt="Logo" class="logo" />
-  <h1>ERP System</h1>
-  
-  <div class="module-cards">
-    <div class="module-card finance" on:click={() => goto('/finance')}>
-      <h2>Finance Module</h2>
-      <p>Financial Management & Analysis</p>
-      <ul>
-        <li>Automated Ledger System</li>
-        <li>Multi-Currency Support</li>
-        <li>Tax Management</li>
-        <li>Financial Forecasting</li>
-      </ul>
-    </div>
-    
-    <div class="module-card analytics" on:click={() => goto('/analytics')}>
-      <h2>Business Analytics</h2>
-      <p>Data-Driven Insights</p>
-      <ul>
-        <li>AI-Powered Analytics</li>
-        <li>Real-time Reporting</li>
-        <li>Predictive Analysis</li>
-        <li>Performance Metrics</li>
-      </ul>
+<main class="landing">
+  <div class="gradient-bg"></div>
+  <div class="container">
+    <div class="content-wrapper">
+      <h1>Welcome to <span class="brand-text">Cichlify's</span> ERP</h1>
+      <p class="subtitle">Select your dashboard experience</p>
+      <div class="button-container">
+        <button 
+          on:click={() => navigateTo('/finance')} 
+          aria-label="Go to Finance Dashboard"
+          class="button primary">
+          Finance Dashboard
+        </button>
+        <button 
+          on:click={() => navigateTo('/business')} 
+          aria-label="Go to Business Analytics Dashboard"
+          class="button secondary">
+          Business Analytics
+        </button>
+      </div>
     </div>
   </div>
 </main>
 
 <style>
-  :global(body) {
-    background: #f8f9fc;
-    color: #1a1f36;
+  :root {
+    --brand-blue: #1078F7; /* Finance color */
+    --brand-purple: #3B28CC; /* Business color */
+    --brand-light: #EAEBED;
+    --spacing-unit: 4rem;
   }
 
-  .landing-container {
+  .landing {
     min-height: 100vh;
-    padding: 2rem;
-    background: linear-gradient(to bottom, #f8f9fc, #eef1f9);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .logo {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 1rem;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #1a1f36;
-    margin-bottom: 3rem;
-    letter-spacing: -0.5px;
-  }
-
-  .module-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
-    width: 100%;
-    max-width: 1200px;
-    padding: 0 1rem;
-  }
-
-  .module-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 16px;
-    color: #1a1f36;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1), 0 1px 2px rgba(16, 24, 40, 0.06);
-  }
-
-  .module-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px -4px rgba(16, 24, 40, 0.08), 0 4px 8px -2px rgba(16, 24, 40, 0.04);
-  }
-
-  .finance {
-    border-left: 4px solid #1098F7;
-  }
-
-  .analytics {
-    border-left: 4px solid #3B28CC;
-  }
-
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0 0 1rem 0;
-    color: #1a1f36;
-  }
-
-  p {
-    color: #64748b;
-    margin-bottom: 1.5rem;
-    font-size: 0.9375rem;
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 1rem 0 0 0;
-  }
-
-  li {
-    margin: 0.75rem 0;
-    color: #64748b;
-    font-size: 0.9375rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-  }
-
-  li::before {
-    content: "•";
-    color: #3B28CC;
-    font-weight: bold;
-  }
-</style>
-
-  h1 {
-    color: #232B28;
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-  }
-
-  .module-cards {
-    display: flex;
-    gap: 2rem;
     justify-content: center;
-    flex-wrap: wrap;
+    background-color: var(--brand-light);
+    position: relative;
+    overflow: hidden;
   }
 
-  .module-card {
-    width: 300px;
-    padding: 2rem;
-    border-radius: 12px;
-    color: white;
+  .gradient-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(16, 120, 247, 0.05) 0%,
+      rgba(59, 40, 204, 0.05) 100%
+    );
+    z-index: 1;
+  }
+
+  .container {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: var(--spacing-unit);
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.05),
+      0 1px 3px rgba(0, 0, 0, 0.1);
+    max-width: 1000px;
+    width: 90%;
+    margin: var(--spacing-unit);
+  }
+
+  .content-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    color: var(--brand-dark);
+    margin-bottom: 1.5rem;
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .brand-text {
+    background: linear-gradient(135deg, var(--brand-blue), var(--brand-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--brand-dark);
+    opacity: 0.8;
+    margin-bottom: var(--spacing-unit);
+    font-size: 1.25rem;
+    font-weight: 400;
+  }
+
+  .button-container {
+    display: grid;
+    gap: 2rem;
+    margin-top: var(--spacing-unit);
+  }
+
+  @media (min-width: 768px) {
+    .button-container {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .button {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
     cursor: pointer;
-    transition: transform 0.2s;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-width: 200px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
 
-  .module-card:hover {
-    transform: translateY(-5px);
+  .button.primary {
+    background: var(--brand-blue);
   }
 
-  .finance {
-    background-color: #1098F7;
+  .button.secondary {
+    background: var(--brand-purple);
   }
 
-  .analytics {
-    background-color: #3B28CC;
+  .button:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+      0 12px 24px rgba(0, 0, 0, 0.15),
+      0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
-  h2 {
-    margin: 0 0 1rem 0;
+  .button:active {
+    transform: translateY(-2px);
   }
 
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 1rem 0 0 0;
-  }
-
-  li {
-    margin: 0.5rem 0;
-    font-size: 0.9rem;
+  .button:focus {
+    outline: none;
+    box-shadow: 
+      0 0 0 3px rgba(16, 120, 247, 0.3),
+      0 12px 24px rgba(0, 0, 0, 0.15);
   }
 </style>
